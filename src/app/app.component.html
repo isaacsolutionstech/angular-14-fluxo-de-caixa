@@ -1,0 +1,74 @@
+<div class="container">
+  <h1 class="header">Fluxo de Caixa</h1>
+
+  <div class="month-selector">
+    <span>Mês Atual</span>
+    <div class="month-navigation">
+      <button (click)="previousMonth()" [disabled]="isEditing">&lt;</button>
+      <button class="current-month" (click)="resetToCurrentMonth()" [disabled]="isEditing">{{ currentMonthDisplay }}</button>
+      <button (click)="nextMonth()" [disabled]="isEditing">&gt;</button>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="summary-item">
+      <span>Entradas</span>
+      <span class="amount income">{{ totalIncome | currency:'BRL' }}</span>
+    </div>
+    <div class="summary-item">
+      <span>Saídas</span>
+      <span class="amount expense">{{ totalExpense | currency:'BRL' }}</span>
+    </div>
+    <div class="summary-item">
+      <span>Total</span>
+      <span class="amount" [ngClass]="{'positive': balance >= 0, 'negative': balance < 0}">
+        {{ balance | currency:'BRL' }}
+      </span>
+    </div>
+  </div>
+
+  <form [formGroup]="entryForm" (ngSubmit)="onSubmit()" class="entry-form">
+    <h2>{{ formTitle }}</h2>
+    <div class="form-group">
+      <label for="description">Descrição:</label>
+      <input id="description" formControlName="description" (input)="updateSuggestions($event)">
+      <ul *ngIf="suggestions.length > 0" class="suggestions">
+        <li *ngFor="let suggestion of suggestions" (click)="selectSuggestion(suggestion)">
+          {{ suggestion }}
+        </li>
+      </ul>
+    </div>
+    <div class="form-group">
+      <label for="amount">Valor:</label>
+      <input type="number" id="amount" formControlName="amount">
+    </div>
+    <div class="form-group">
+      <label for="type">Entrada/Saída:</label>
+      <select id="type" formControlName="type">
+        <option value="income">Entrada</option>
+        <option value="expense">Saída</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button type="submit" [disabled]="entryForm.invalid">
+        {{ isEditing ? 'Atualizar' : 'Salvar' }}
+      </button>
+      <button type="button" (click)="cancelEdit()" *ngIf="isEditing">Cancelar</button>
+    </div>
+  </form>
+
+  <div class="entries-list">
+    <h2>Sem Datas Específicas</h2>
+    <ul>
+      <li *ngFor="let entry of filteredEntries; let i = index" [ngClass]="{'income': entry.type === 'income', 'expense': entry.type === 'expense'}">
+        <span class="description">{{ entry.description }}</span>
+        <span class="amount">{{ entry.amount | currency:'BRL' }}</span>
+        <span class="amount">{{ entry.amountInDollar | currency:'USD' }}</span>
+        <div class="actions">
+          <button (click)="editEntry(entry)">Editar</button>
+          <button (click)="deleteEntry(i)">Excluir</button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
